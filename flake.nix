@@ -12,34 +12,36 @@
         "aarch64-darwin"
       ];
       forAllSystems = nixpkgs.lib.genAttrs systems;
+      mkMkmaciso = pkgs:
+        pkgs.stdenvNoCC.mkDerivation {
+          pname = "mkmaciso";
+          version = "0.1.0";
+
+          src = self;
+
+          dontConfigure = true;
+          dontBuild = true;
+
+          installPhase = ''
+            runHook preInstall
+            install -Dm755 mkmaciso "$out/bin/mkmaciso"
+            runHook postInstall
+          '';
+
+          meta = with pkgs.lib; {
+            description = "Build bootable macOS installer ISO/DMG images from Apple servers";
+            homepage = "https://github.com/LongQT-sea/macos-iso-builder";
+            license = licenses.gpl3Only;
+            mainProgram = "mkmaciso";
+            platforms = platforms.darwin;
+          };
+        };
     in {
       packages = forAllSystems (system:
         let
           pkgs = import nixpkgs { inherit system; };
         in {
-          mkmaciso = pkgs.stdenvNoCC.mkDerivation {
-            pname = "mkmaciso";
-            version = "0.1.0";
-
-            src = self;
-
-            dontConfigure = true;
-            dontBuild = true;
-
-            installPhase = ''
-              runHook preInstall
-              install -Dm755 mkmaciso "$out/bin/mkmaciso"
-              runHook postInstall
-            '';
-
-            meta = with pkgs.lib; {
-              description = "Build bootable macOS installer ISO/DMG images from Apple servers";
-              homepage = "https://github.com/LongQT-sea/macos-iso-builder";
-              license = licenses.gpl3Only;
-              mainProgram = "mkmaciso";
-              platforms = platforms.darwin;
-            };
-          };
+          mkmaciso = mkMkmaciso pkgs;
 
           default = self.packages.${system}.mkmaciso;
         });
@@ -53,7 +55,7 @@
       });
 
       overlays.default = final: prev: {
-        mkmaciso = self.packages.${prev.system}.mkmaciso;
+        mkmaciso = mkMkmaciso final;
       };
     };
 }
