@@ -142,6 +142,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v22
+
       - name: System Information
         run: |
           echo "Runner OS: $(sw_vers -productName) $(sw_vers -productVersion)"
@@ -156,7 +159,7 @@ jobs:
       - name: Create macOS image
         id: create_image
         run: |
-          ./mkmaciso "${{ inputs.macos_version }}" "${{ inputs.image_format }}"
+          nix run .#mkmaciso -- "${{ inputs.macos_version }}" "${{ inputs.image_format }}"
           if [ "${{ inputs.image_format }}" == "iso" ]; then
             echo "image_name=$(basename *.iso)" >> $GITHUB_OUTPUT
           else
