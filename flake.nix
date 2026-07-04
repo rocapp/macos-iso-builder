@@ -57,5 +57,42 @@
       overlays.default = final: prev: {
         mkmaciso = mkMkmaciso final;
       };
+
+      checks = forAllSystems (system:
+        let
+          pkgs = import nixpkgs { inherit system; };
+        in {
+          mkmaciso-bash-syntax = pkgs.runCommand "mkmaciso-bash-syntax" {
+            nativeBuildInputs = [ pkgs.bash ];
+          } ''
+            bash -n ${self}/mkmaciso
+            touch $out
+          '';
+
+          mkmaciso-shellcheck = pkgs.runCommand "mkmaciso-shellcheck" {
+            nativeBuildInputs = [ pkgs.shellcheck ];
+          } ''
+            shellcheck --shell=bash --severity=warning ${self}/mkmaciso
+            touch $out
+          '';
+        });
+
+      devShells = forAllSystems (system:
+        let
+          pkgs = import nixpkgs { inherit system; };
+        in {
+          default = pkgs.mkShell {
+            packages = with pkgs; [
+              bashInteractive
+              shellcheck
+              actionlint
+            ];
+          };
+        });
+
+      formatter = forAllSystems (system:
+        let
+          pkgs = import nixpkgs { inherit system; };
+        in pkgs.nixpkgs-fmt);
     };
 }

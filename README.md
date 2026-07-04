@@ -78,6 +78,18 @@ chmod +x mkmaciso
 
 Running `./mkmaciso` without arguments gives you an interactive menu.
 
+### Run with Nix flakes
+
+If you use Nix, run the tool directly from this repository:
+```bash
+nix run .#mkmaciso -- tahoe iso
+```
+
+You can also run project checks locally:
+```bash
+nix flake check
+```
+
 ---
 
 ## Tips
@@ -105,3 +117,8 @@ Apple for macOS and their update servers, [Mavericks Forever](https://mavericksf
 This tool downloads macOS images directly from Apple's official servers. Users are responsible for complying with [Apple's Software License Agreement](https://www.apple.com/legal/sla/). macOS is a trademark of Apple Inc.
 
 Licensed under GPLv3.
+
+## CI/CD
+
+- `CI` workflow runs flake-based checks on every push and pull request.
+- `Build Full Installer ISO/DMG image` and `Build Recovery ISO image` are manual `workflow_dispatch` jobs for on-demand image builds.
